@@ -10,7 +10,7 @@ public class Cannon : MonoBehaviour, IWeapon
     {
         Debug.Log("Shooting towards " + dir);
 
-        GameObject newProjectile = Instantiate(projectile, transform.position + Vector3.forward, Quaternion.identity);
+        GameObject newProjectile = Instantiate(projectile, transform.position + transform.forward + Vector3.up, Quaternion.identity);
         newProjectile.GetComponent<Rigidbody>().AddForce(dir * projectileSpeed, ForceMode.Impulse);
     }
 }

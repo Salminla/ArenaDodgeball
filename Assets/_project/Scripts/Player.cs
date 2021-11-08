@@ -20,6 +20,7 @@ public class Player : MonoBehaviour
     void Update()
     {
         SetInputVector();
+        IsGrounded();
     }
 
     private void FixedUpdate()
@@ -40,7 +41,7 @@ public class Player : MonoBehaviour
         input = Vector3.ClampMagnitude(input, 1f);
         
         Sprint();
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && IsGrounded())
             Jump();
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
@@ -65,17 +66,26 @@ public class Player : MonoBehaviour
         sprint = Input.GetKey(KeyCode.LeftShift);
 
     }
-
     void Jump()
     {
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
     void MovePlayer()
     {
-        if (!sprint)
-            rb.velocity = input * walkSpeed * Time.deltaTime + rb.velocity.y * Vector3.up;
-        else
-            rb.velocity = input * sprintSpeed * Time.deltaTime + rb.velocity.y * Vector3.up;
+        if (IsGrounded())
+        {
+            if (!sprint)
+                rb.velocity = input * walkSpeed * Time.deltaTime + rb.velocity.y * Vector3.up;
+            else
+                rb.velocity = input * sprintSpeed * Time.deltaTime + rb.velocity.y * Vector3.up;
+        }
+    }
 
+    bool IsGrounded()
+    {
+        return Physics.CheckCapsule(transform.position + Vector3.up * 0.5f, 
+            transform.position + Vector3.down * 0.58f, 
+            0.45f, 
+            LayerMask.GetMask("Default"));
     }
 }
