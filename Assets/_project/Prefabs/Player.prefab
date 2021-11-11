@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 386533283}
   - component: {fileID: 386533287}
   - component: {fileID: 386533286}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -107,6 +107,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
   m_RenderPostProcessing: 0
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
@@ -130,7 +131,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerTransform: {fileID: 5390552684779243694}
-  sensitivity: 150
+  sensitivity: 2
 --- !u!1 &5390552684779243690
 GameObject:
   m_ObjectHideFlags: 0
@@ -149,7 +150,7 @@ GameObject:
   - component: {fileID: 1466468275}
   - component: {fileID: 1466468274}
   - component: {fileID: 649207793814227085}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -199,7 +200,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: b8168f835eff52f49a133ccce614fb37, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -333,9 +334,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerCamera: {fileID: 386533284}
-  walkSpeed: 500
+  walkSpeed: 700
   sprintSpeed: 800
   jumpForce: 6
+  inputAcceleration: 3
+  inputDeceleration: 3
 --- !u!1001 &6153289874954121953
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -390,6 +393,10 @@ PrefabInstance:
     - target: {fileID: 6153289874632362366, guid: 236cea8023682bf468f07580c2ac3a77, type: 3}
       propertyPath: m_Name
       value: Cannon
+      objectReference: {fileID: 0}
+    - target: {fileID: 6153289874632362366, guid: 236cea8023682bf468f07580c2ac3a77, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 236cea8023682bf468f07580c2ac3a77, type: 3}
