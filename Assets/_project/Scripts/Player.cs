@@ -1,14 +1,19 @@
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
 public class Player : NetworkBehaviour
 {
     [SerializeField] private Camera playerCamera;
+    [SerializeField] private MouseLook mouseLook;
     [SerializeField] private float walkSpeed = 500f;
     [SerializeField] private float sprintSpeed = 800f;
     [SerializeField] private float jumpForce = 10f;
     public float inputAcceleration = 1f;
     public float inputDeceleration = 2f;
+    
+    public NetworkVariable<FixedString32Bytes> playerName = new NetworkVariable<FixedString32Bytes>(new FixedString32Bytes(""));
+    
     private Vector3 rawInput;
     private Vector3 input;
     private float xSmoothed;
@@ -24,22 +29,48 @@ public class Player : NetworkBehaviour
         
         rb = GetComponent<Rigidbody>();
     }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer)
+        {
+            playerName.Value = "Player " + (OwnerClientId + 1);
+        }
+        else
+        {
+            SetNameClientRpc("Player " + (OwnerClientId + 1));
+        }
+    }
+
     void Update()
     {
         isGrounded = IsGrounded();
-        if (IsOwner)
-        {
-            SetInputVector();
-        }
-        
-        
+        if (IsServer)        
+            UpdateServer();
+        if (IsClient)        
+            UpdateClient();    
     }
 
     private void FixedUpdate()
     {
         MovePlayer();
     }
- 
+    private void UpdateServer()
+    {
+        //MovePlayer();
+    }
+    private void UpdateClient()
+    {
+        if (!IsLocalPlayer)        
+            return;
+
+        SetInputVector();
+
+        InputValueServerRpc(input);
+
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+            ShootServerRpc();
+    }
     void SetInputVector()
     {
         rawInput.x = InputSmoothing("Horizontal", ref xSmoothed);
@@ -55,22 +86,19 @@ public class Player : NetworkBehaviour
         Sprint();
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
             Jump();
-        if (Input.GetKeyDown(KeyCode.Mouse0))
-            Shoot();
-
     }
-    public float InputSmoothing(string axis, ref float smoothed)
-    {
-     
-            var accelerating = Input.GetAxisRaw(axis);
 
-            if (accelerating > 0)
-                smoothed = Mathf.Clamp(smoothed + inputAcceleration * Time.deltaTime, -1f, accelerating);
-            else if (accelerating < 0)
-                smoothed = Mathf.Clamp(smoothed - inputAcceleration * Time.deltaTime, accelerating, 1f);
-            else
-                smoothed = Mathf.Clamp01(Mathf.Abs(smoothed) - inputDeceleration * Time.deltaTime) * Mathf.Sign(smoothed);
-            return smoothed;
+    float InputSmoothing(string axis, ref float smoothed)
+    {
+        var accelerating = Input.GetAxisRaw(axis);
+
+        if (accelerating > 0)
+            smoothed = Mathf.Clamp(smoothed + inputAcceleration * Time.deltaTime, -1f, accelerating);
+        else if (accelerating < 0)
+            smoothed = Mathf.Clamp(smoothed - inputAcceleration * Time.deltaTime, accelerating, 1f);
+        else
+            smoothed = Mathf.Clamp01(Mathf.Abs(smoothed) - inputDeceleration * Time.deltaTime) * Mathf.Sign(smoothed);
+        return smoothed;
         
     }
     void Sprint()
@@ -94,13 +122,11 @@ public class Player : NetworkBehaviour
     }
     void MovePlayer()
     {
-        if (isGrounded)
-        {
-            if (!sprint)
-                rb.velocity = input * ((walkSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, walkSpeed)) * Time.deltaTime) + rb.velocity.y * Vector3.up;
-            else
-                rb.velocity = input * ((sprintSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, sprintSpeed)) * Time.deltaTime) + rb.velocity.y * Vector3.up;
-        }
+        if (!isGrounded) return;
+        if (!sprint)
+            rb.velocity = input * ((walkSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, walkSpeed)) * Time.deltaTime) + rb.velocity.y * Vector3.up;
+        else
+            rb.velocity = input * ((sprintSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, sprintSpeed)) * Time.deltaTime) + rb.velocity.y * Vector3.up;
     }
 
     bool IsGrounded()
@@ -109,5 +135,20 @@ public class Player : NetworkBehaviour
             transform.position + Vector3.down * 0.7f, 
             0.40f, 
             LayerMask.GetMask("Default"));
+    }
+    [ServerRpc]
+    public void InputValueServerRpc(Vector3 move)
+    {
+        input = move;
+    }
+    [ServerRpc]
+    public void ShootServerRpc()
+    {
+        Shoot();
+    }
+    [ClientRpc]
+    public void SetNameClientRpc(string name)
+    {
+        playerName.Value = name;
     }
 }
