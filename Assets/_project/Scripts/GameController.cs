@@ -21,17 +21,32 @@ public class GameController : MonoBehaviour
     {
         transport = NetworkManager.Singleton.NetworkConfig.NetworkTransport as UNetTransport;
         
-        buttonHost.onClick.AddListener(() => NetworkManager.Singleton.StartHost());
-        buttonServer.onClick.AddListener(() => NetworkManager.Singleton.StartServer());
-        buttonClient.onClick.AddListener(() => NetworkManager.Singleton.StartClient());
-        buttonDisconnect.onClick.AddListener(() => NetworkManager.Singleton.Shutdown());
+        buttonHost.onClick.AddListener(() =>
+        {
+            NetworkManager.Singleton.StartHost();
+            SetInfoText(true);
+        });
+        buttonServer.onClick.AddListener(() =>
+        {
+            NetworkManager.Singleton.StartServer();
+            SetInfoText(true);
+        });
+        buttonClient.onClick.AddListener(() =>
+        {
+            NetworkManager.Singleton.StartClient();
+            SetInfoText(true);
+        });
+        buttonDisconnect.onClick.AddListener(() =>
+        {
+            NetworkManager.Singleton.Shutdown();
+            SetInfoText(true);
+        });
     }
 
-    private void Update()
+    void SetInfoText(bool show)
     {
-        GetInfoText(true);
+        textInfo.text = GetInfoText(show);
     }
-
     string GetInfoText(bool show)
     {
         string hostServer = NetworkManager.Singleton.IsHost ? "Host" : "Server";

@@ -75,7 +75,7 @@ public class Player : NetworkBehaviour
         InputValueServerRpc(input);
 
         if (Input.GetKeyDown(KeyCode.Mouse0))
-            Shoot();
+            ShootServerRpc();
     }
     void SetInputVector()
     {
@@ -92,7 +92,7 @@ public class Player : NetworkBehaviour
         
         Sprint();
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-            JumpServerRpc();
+            Jump();
     }
     // Make this related to the player velocity and direction?
     float InputSmoothing(string axis, ref float smoothed)
@@ -114,7 +114,9 @@ public class Player : NetworkBehaviour
     }
     void Jump()
     {
+        Debug.Log("JUMP");
         rb.AddForce(Vector3.up * (jumpForce - rb.velocity.y * 0.5f), ForceMode.Impulse);
+        //rb.velocity += Vector3.up * (jumpForce - rb.velocity.y * 0.5f);
     }
     void Shoot()
     {
@@ -129,11 +131,20 @@ public class Player : NetworkBehaviour
     }
     void MovePlayer()
     {
-        if (!isGrounded) return;
-        if (!sprint)
-            rb.velocity = input * ((walkSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, walkSpeed)) * Time.deltaTime) + rb.velocity.y * Vector3.up;
-        else
-            rb.velocity = input * ((sprintSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, sprintSpeed)) * Time.deltaTime) + rb.velocity.y * Vector3.up;
+        // Ground movement
+        if (isGrounded)
+        {
+            if (!sprint)
+                rb.velocity = input * ((walkSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, walkSpeed)) * Time.deltaTime) +
+                              rb.velocity.y * Vector3.up;
+            else
+                rb.velocity =
+                    input * ((sprintSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, sprintSpeed)) * Time.deltaTime) +
+                    rb.velocity.y * Vector3.up;
+            return;
+        }
+        // Air movement
+        rb.AddForce(input * 5); 
     }
 
     bool IsGrounded()
@@ -152,11 +163,6 @@ public class Player : NetworkBehaviour
     public void ShootServerRpc()
     {
         Shoot();
-    }
-    [ServerRpc]
-    public void JumpServerRpc()
-    {
-        Jump();
     }
     [ClientRpc]
     public void SetNameClientRpc(string name)

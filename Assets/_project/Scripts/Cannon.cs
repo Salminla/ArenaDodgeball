@@ -12,6 +12,7 @@ public class Cannon : NetworkBehaviour, IWeapon
         Debug.Log("Shooting towards " + dir);
 
         GameObject newProjectile = Instantiate(projectile, transform.position + transform.forward + Vector3.up, Quaternion.identity);
+        newProjectile.GetComponent<NetworkObject>().Spawn();
         newProjectile.GetComponent<Rigidbody>().AddForce(dir * projectileSpeed, ForceMode.Impulse);
     }
     [ServerRpc]
