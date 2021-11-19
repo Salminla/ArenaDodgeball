@@ -1,15 +1,15 @@
-
 using Unity.Netcode;
 using UnityEngine;
 
 public class MouseLook : NetworkBehaviour
 {
-    [SerializeField] private Transform playerTransform;
+    public Transform playerTransform;
     [SerializeField] private float sensitivity = 60;
     private float mouseX;
     private float mouseY;
-    
-    float _xRotation = 0f;
+
+    private float _xRotation;
+    private float _yRotation;
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -20,8 +20,19 @@ public class MouseLook : NetworkBehaviour
         if (IsServer)        
             UpdateServer();
         if (IsClient)        
-            UpdateClient();  
-        //RotateCamera();
+            UpdateClient();
+        RotateCamera();
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+            Cursor.lockState = CursorLockMode.None;
+    }
+
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (hasFocus)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+        }
     }
 
     private void UpdateClient()
@@ -31,19 +42,21 @@ public class MouseLook : NetworkBehaviour
         
         GetRotation();
         
-        InputValueServerRpc(_xRotation);
+        InputValueServerRpc(_xRotation, _yRotation);
     }
 
     private void UpdateServer()
     {
-        RotateCamera();
+        //RotateCamera();
     }
 
     void RotateCamera()
     {
+        //transform.localRotation = Quaternion.Euler(_xRotation, transform.rotation.eulerAngles.y, 0f);
         transform.localRotation = Quaternion.Euler(_xRotation, 0f, 0f);
-
-        playerTransform.Rotate(Vector3.up * mouseX);
+        //transform.Rotate(Vector3.right * _xRotation);
+        //transform.Rotate(Vector3.up * mouseX);
+        playerTransform.Rotate(Vector3.up * _yRotation);
     }
 
     void GetRotation()
@@ -51,12 +64,14 @@ public class MouseLook : NetworkBehaviour
         mouseX = Input.GetAxis("Mouse X") * sensitivity;
         mouseY = Input.GetAxis("Mouse Y") * sensitivity;
 
+        _yRotation = mouseX;
         _xRotation -= mouseY;
         _xRotation = Mathf.Clamp(_xRotation, -90f, 90f);
     }
     [ServerRpc]
-    public void InputValueServerRpc(float rot)
+    public void InputValueServerRpc(float rot, float _mouseX)
     {
         _xRotation = rot;
+        _yRotation = _mouseX;
     }
 }

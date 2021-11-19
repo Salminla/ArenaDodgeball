@@ -1,3 +1,4 @@
+using System;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
@@ -5,7 +6,7 @@ using UnityEngine;
 public class Player : NetworkBehaviour
 {
     [SerializeField] private Camera playerCamera;
-    [SerializeField] private MouseLook mouseLook;
+    //[SerializeField] private MouseLook mouseLook;
     [SerializeField] private float walkSpeed = 500f;
     [SerializeField] private float sprintSpeed = 800f;
     [SerializeField] private float jumpForce = 10f;
@@ -32,6 +33,11 @@ public class Player : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        if (IsLocalPlayer)
+        {
+            playerCamera.enabled = true;
+        }
+         
         if (IsServer)
         {
             playerName.Value = "Player " + (OwnerClientId + 1);
@@ -48,7 +54,7 @@ public class Player : NetworkBehaviour
         if (IsServer)        
             UpdateServer();
         if (IsClient)        
-            UpdateClient();    
+            UpdateClient();
     }
 
     private void FixedUpdate()
@@ -69,7 +75,7 @@ public class Player : NetworkBehaviour
         InputValueServerRpc(input);
 
         if (Input.GetKeyDown(KeyCode.Mouse0))
-            ShootServerRpc();
+            Shoot();
     }
     void SetInputVector()
     {
@@ -77,17 +83,18 @@ public class Player : NetworkBehaviour
         rawInput.z = InputSmoothing("Vertical", ref ySmoothed);
         
         Transform playerTransform = transform;
-        var forward = playerTransform.forward;
-        var right = playerTransform.right;
+        //var forward = playerTransform.forward;
+        var forward = new Vector3(playerCamera.transform.forward.x, 0, playerCamera.transform.forward.z) ;
+        var right = playerCamera.transform.right;
         
         input = (forward * rawInput.z) + (right * rawInput.x);
         input = Vector3.ClampMagnitude(input, 1f);
         
         Sprint();
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-            Jump();
+            JumpServerRpc();
     }
-
+    // Make this related to the player velocity and direction?
     float InputSmoothing(string axis, ref float smoothed)
     {
         var accelerating = Input.GetAxisRaw(axis);
@@ -145,6 +152,11 @@ public class Player : NetworkBehaviour
     public void ShootServerRpc()
     {
         Shoot();
+    }
+    [ServerRpc]
+    public void JumpServerRpc()
+    {
+        Jump();
     }
     [ClientRpc]
     public void SetNameClientRpc(string name)

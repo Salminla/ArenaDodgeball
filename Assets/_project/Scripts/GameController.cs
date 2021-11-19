@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -24,6 +25,11 @@ public class GameController : MonoBehaviour
         buttonServer.onClick.AddListener(() => NetworkManager.Singleton.StartServer());
         buttonClient.onClick.AddListener(() => NetworkManager.Singleton.StartClient());
         buttonDisconnect.onClick.AddListener(() => NetworkManager.Singleton.Shutdown());
+    }
+
+    private void Update()
+    {
+        GetInfoText(true);
     }
 
     string GetInfoText(bool show)
