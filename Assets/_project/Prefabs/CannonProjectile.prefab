@@ -14,8 +14,8 @@ GameObject:
   - component: {fileID: 6992221672931851259}
   - component: {fileID: 1496997351296161100}
   - component: {fileID: 4734761100684284886}
-  - component: {fileID: -801849017964588019}
-  - component: {fileID: -7811422588511369261}
+  - component: {fileID: -4252512479693372891}
+  - component: {fileID: -4751143757756187629}
   m_Layer: 0
   m_Name: CannonProjectile
   m_TagString: Untagged
@@ -131,7 +131,7 @@ MonoBehaviour:
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
---- !u!114 &-801849017964588019
+--- !u!114 &-4252512479693372891
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -156,9 +156,9 @@ MonoBehaviour:
   RotAngleThreshold: 0.01
   ScaleThreshold: 0.01
   InLocalSpace: 0
-  Interpolate: 1
+  Interpolate: 0
   CanCommitToTransform: 0
---- !u!114 &-7811422588511369261
+--- !u!114 &-4751143757756187629
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
