@@ -10,6 +10,9 @@ public class Player : NetworkBehaviour
     [SerializeField] private float walkSpeed = 500f;
     [SerializeField] private float sprintSpeed = 800f;
     [SerializeField] private float jumpForce = 10f;
+    // TEST
+    [SerializeField] private Animator playerAnimator;
+    
     public float inputAcceleration = 1f;
     public float inputDeceleration = 2f;
     
@@ -23,6 +26,7 @@ public class Player : NetworkBehaviour
 
     private bool isGrounded;
     private bool sprint;
+    private bool hasInput;
     
     void Start()
     {
@@ -41,6 +45,7 @@ public class Player : NetworkBehaviour
         if (IsServer)
         {
             playerName.Value = "Player " + (OwnerClientId + 1);
+            NetworkObjectPool.Singleton.InitializePool();
         }
         else
         {
@@ -64,6 +69,7 @@ public class Player : NetworkBehaviour
     private void UpdateServer()
     {
         //MovePlayer();
+        
     }
     private void UpdateClient()
     {
@@ -89,6 +95,10 @@ public class Player : NetworkBehaviour
         
         input = (forward * rawInput.z) + (right * rawInput.x);
         input = Vector3.ClampMagnitude(input, 1f);
+
+        playerAnimator.SetBool("HasInput", input.magnitude > 0.01f);
+
+        playerAnimator.SetFloat("PlayerVel", rb.velocity.magnitude / 10f);
         
         Sprint();
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
@@ -116,6 +126,7 @@ public class Player : NetworkBehaviour
     {
         Debug.Log("JUMP");
         rb.AddForce(Vector3.up * (jumpForce - rb.velocity.y * 0.5f), ForceMode.Impulse);
+        playerAnimator.SetTrigger("JumpTrig");
         //rb.velocity += Vector3.up * (jumpForce - rb.velocity.y * 0.5f);
     }
     void Shoot()
@@ -124,6 +135,7 @@ public class Player : NetworkBehaviour
         {
             IWeapon weapon = transform.GetComponentInChildren<IWeapon>();
             weapon.Shoot(playerCamera.transform.forward);
+            playerAnimator.SetTrigger("Shoot");
             return;
         }
 
@@ -135,12 +147,19 @@ public class Player : NetworkBehaviour
         if (isGrounded)
         {
             if (!sprint)
+            {
                 rb.velocity = input * ((walkSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, walkSpeed)) * Time.deltaTime) +
                               rb.velocity.y * Vector3.up;
+                
+            }
             else
+            {
                 rb.velocity =
                     input * ((sprintSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, sprintSpeed)) * Time.deltaTime) +
                     rb.velocity.y * Vector3.up;
+                
+            }
+
             return;
         }
         // Air movement
