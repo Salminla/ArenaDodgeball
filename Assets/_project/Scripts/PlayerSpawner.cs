@@ -5,14 +5,17 @@ using UnityEngine;
 public class PlayerSpawner : MonoBehaviour
 {
     public List<Transform> spawnPoints;
-    
+    private int spawnIndex;
     void Start()
     {
-        NetworkManager.Singleton.ConnectionApprovalCallback += ConnectionApproval;
+        //NetworkManager.Singleton.ConnectionApprovalCallback += ConnectionApproval;
     }
     Transform GetSpawnPoint()
     {
-        return spawnPoints[Random.Range(0, spawnPoints.Count)];
+        Transform newSpawn = spawnIndex != 0 ? spawnPoints[0] : spawnPoints[spawnIndex];
+
+        spawnIndex++;
+        return newSpawn;
     }
     void ConnectionApproval(byte[] payload, ulong clientId, NetworkManager.ConnectionApprovedDelegate callback)
     {

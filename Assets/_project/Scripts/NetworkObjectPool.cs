@@ -41,6 +41,7 @@ public class NetworkObjectPool : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        Debug.Log("Pooler spawned..");
         InitializePool();
     }
 
@@ -181,6 +182,7 @@ public class NetworkObjectPool : NetworkBehaviour
     public void InitializePool()
     {
         if (m_HasInitialized) return;
+        Debug.Log("Initializing pool...");
         foreach (var configObject in PooledPrefabsList)
         {
             RegisterPrefabInternal(configObject.Prefab, configObject.PrewarmCount);

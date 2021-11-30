@@ -148,6 +148,8 @@ GameObject:
   - component: {fileID: 4545083448850402459}
   - component: {fileID: 3120879283630695258}
   - component: {fileID: 2471882598590196837}
+  - component: {fileID: 404429790163029136}
+  - component: {fileID: 5572007828886286510}
   m_Layer: 3
   m_Name: PlayerNew
   m_TagString: Untagged
@@ -325,6 +327,40 @@ MonoBehaviour:
         byte0027: 0
         byte0028: 0
         byte0029: 0
+--- !u!95 &404429790163029136
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7025756393341578306}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &5572007828886286510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7025756393341578306}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Animator: {fileID: 8801443819377804980}
+  m_ParameterSendBits: 0
+  m_SendRate: 0.1
 --- !u!1001 &3120879284027325221
 PrefabInstance:
   m_ObjectHideFlags: 0

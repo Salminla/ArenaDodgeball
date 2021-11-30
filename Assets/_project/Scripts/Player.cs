@@ -17,6 +17,7 @@ public class Player : NetworkBehaviour
     public float inputDeceleration = 2f;
     
     public NetworkVariable<FixedString32Bytes> playerName = new NetworkVariable<FixedString32Bytes>(new FixedString32Bytes(""));
+    public NetworkVariable<int> Health = new NetworkVariable<int>(100);
     
     private Vector3 rawInput;
     private Vector3 input;
@@ -27,6 +28,8 @@ public class Player : NetworkBehaviour
     private bool isGrounded;
     private bool sprint;
     private bool hasInput;
+
+    private bool playerActive;
     
     void Start()
     {
@@ -45,16 +48,19 @@ public class Player : NetworkBehaviour
         if (IsServer)
         {
             playerName.Value = "Player " + (OwnerClientId + 1);
-            NetworkObjectPool.Singleton.InitializePool();
+            //NetworkObjectPool.Singleton.InitializePool();
         }
         else
         {
             SetNameClientRpc("Player " + (OwnerClientId + 1));
         }
+        
+        GameController.GameStarted.OnValueChanged += HandleGameStarted;
     }
 
     void Update()
     {
+        if (!playerActive) return;
         isGrounded = IsGrounded();
         if (IsServer)        
             UpdateServer();
@@ -69,7 +75,6 @@ public class Player : NetworkBehaviour
     private void UpdateServer()
     {
         //MovePlayer();
-        
     }
     private void UpdateClient()
     {
@@ -82,6 +87,11 @@ public class Player : NetworkBehaviour
 
         if (Input.GetKeyDown(KeyCode.Mouse0))
             ShootServerRpc();
+    }
+
+    private void HandleGameStarted(bool _old, bool _new)
+    {
+        playerActive = _new;
     }
     void SetInputVector()
     {
@@ -96,9 +106,10 @@ public class Player : NetworkBehaviour
         input = (forward * rawInput.z) + (right * rawInput.x);
         input = Vector3.ClampMagnitude(input, 1f);
 
-        playerAnimator.SetBool("HasInput", input.magnitude > 0.01f);
-
-        playerAnimator.SetFloat("PlayerVel", rb.velocity.magnitude / 10f);
+        //playerAnimator.SetBool("HasInput", input.magnitude > 0.01f);
+        AnimationBoolServerRpc("HasInput", input.magnitude > 0.01f);
+        //playerAnimator.SetFloat("PlayerVel", rb.velocity.magnitude / 10f);
+        AnimationFloatServerRpc("PlayerVel", rb.velocity.magnitude / 10f);
         
         Sprint();
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
@@ -124,10 +135,9 @@ public class Player : NetworkBehaviour
     }
     void Jump()
     {
-        Debug.Log("JUMP");
         rb.AddForce(Vector3.up * (jumpForce - rb.velocity.y * 0.5f), ForceMode.Impulse);
-        playerAnimator.SetTrigger("JumpTrig");
-        //rb.velocity += Vector3.up * (jumpForce - rb.velocity.y * 0.5f);
+        //playerAnimator.SetTrigger("JumpTrig");
+        AnimationTriggerServerRpc("JumpTrig");
     }
     void Shoot()
     {
@@ -135,11 +145,31 @@ public class Player : NetworkBehaviour
         {
             IWeapon weapon = transform.GetComponentInChildren<IWeapon>();
             weapon.Shoot(playerCamera.transform.forward);
-            playerAnimator.SetTrigger("Shoot");
+            //playerAnimator.SetTrigger("Shoot");
+            AnimationTriggerServerRpc("Shoot");
             return;
         }
 
         Debug.Log("No weapon!");
+    }
+    public void TakeDamage(Vector3 _hitPoint, int _amount)
+    {
+        Debug.Log(playerName.Value + " takes " + _amount + " damage.");
+        // Instantiate<SelfDestructingNetworkObject>(HitExplosionEffect, _hitPoint, Quaternion.identity).Init(3f);
+        
+        Health.Value = Health.Value - _amount;
+        
+        if (Health.Value <= 0)
+        {
+            Health.Value = 0;
+
+            //"Ulkoistettu" CheckPlayerStatusServerRpc käy läpi kaikkien tilan.
+            //Tässä voisi pitää yksinkertaisempaakin kirjanpitoa siitä, kuinka
+            //moni pelaajista on kuollut ja pitäisikö peli päättää. Mutta pelistä
+            //riippuen voi olla tarpeen tarkastella ja päivittää arvoja kaikkien
+            //pelaajien osalta, johon voi käyttää tämän tyylistä ideaa.
+            GameController.Instance.CheckPlayerStatusServerRpc(false);
+        }
     }
     void MovePlayer()
     {
@@ -150,14 +180,12 @@ public class Player : NetworkBehaviour
             {
                 rb.velocity = input * ((walkSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, walkSpeed)) * Time.deltaTime) +
                               rb.velocity.y * Vector3.up;
-                
             }
             else
             {
                 rb.velocity =
                     input * ((sprintSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, sprintSpeed)) * Time.deltaTime) +
                     rb.velocity.y * Vector3.up;
-                
             }
 
             return;
@@ -182,6 +210,22 @@ public class Player : NetworkBehaviour
     public void ShootServerRpc()
     {
         Shoot();
+    }
+    // Animation triggers done with server RPC
+    [ServerRpc]
+    void AnimationTriggerServerRpc(string trigger)
+    {
+        playerAnimator.SetTrigger(trigger);
+    }
+    [ServerRpc]
+    void AnimationFloatServerRpc(string trigger, float value)
+    {
+        playerAnimator.SetFloat(trigger, value);
+    }
+    [ServerRpc]
+    void AnimationBoolServerRpc(string trigger, bool value)
+    {
+        playerAnimator.SetBool(trigger, value);
     }
     [ClientRpc]
     public void SetNameClientRpc(string name)

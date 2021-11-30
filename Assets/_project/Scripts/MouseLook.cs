@@ -10,26 +10,36 @@ public class MouseLook : NetworkBehaviour
 
     private float _xRotation;
     private float _yRotation;
-    private void Start()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
-    }
+    
+    private bool playerActive;
 
     void Update()
     {
-        if (IsServer)        
-            UpdateServer();
-        if (IsClient)        
-            UpdateClient();
-        RotateCamera();
+        if (playerActive)
+        {
+            if (IsClient)        
+                UpdateClient();
+            RotateCamera();
+        }
 
         if (Input.GetKeyDown(KeyCode.Escape))
             Cursor.lockState = CursorLockMode.None;
     }
 
+    public override void OnNetworkSpawn()
+    {
+        GameController.GameStarted.OnValueChanged += HandleGameStarted;
+    }
+
+    private void HandleGameStarted(bool previousvalue, bool newvalue)
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        playerActive = true;
+    }
+
     private void OnApplicationFocus(bool hasFocus)
     {
-        if (hasFocus)
+        if (hasFocus && playerActive)
         {
             Cursor.lockState = CursorLockMode.Locked;
         }
@@ -45,17 +55,9 @@ public class MouseLook : NetworkBehaviour
         InputValueServerRpc(_xRotation, _yRotation);
     }
 
-    private void UpdateServer()
-    {
-        //RotateCamera();
-    }
-
     void RotateCamera()
     {
-        //transform.localRotation = Quaternion.Euler(_xRotation, transform.rotation.eulerAngles.y, 0f);
         transform.localRotation = Quaternion.Euler(_xRotation, 0f, 0f);
-        //transform.Rotate(Vector3.right * _xRotation);
-        //transform.Rotate(Vector3.up * mouseX);
         playerTransform.Rotate(Vector3.up * _yRotation);
     }
 

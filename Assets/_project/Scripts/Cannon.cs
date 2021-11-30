@@ -10,10 +10,10 @@ public class Cannon : NetworkBehaviour, IWeapon
     
     public void Shoot(Vector3 dir)
     {
-        Debug.Log("Shooting towards " + dir);
-        
-        NetworkObject newProjectile = NetworkObjectPool.Singleton.GetNetworkObject(projectile, transform.position + dir.normalized + transform.forward + Vector3.up, Quaternion.identity);
-        //newProjectile.Spawn();
+        //NetworkObject newProjectile = NetworkObjectPool.Singleton.GetNetworkObject(projectile, transform.position + dir.normalized + transform.forward + Vector3.up, Quaternion.identity);
+        NetworkObject newProjectile = Instantiate(projectile,
+            transform.position + dir.normalized + transform.forward + Vector3.up, Quaternion.identity).GetComponent<NetworkObject>();
+        newProjectile.Spawn();
         newProjectile.GetComponent<Rigidbody>().AddForce(dir * projectileSpeed, ForceMode.Impulse);
         StartCoroutine(DespawnDelay(newProjectile));
     }
@@ -23,7 +23,7 @@ public class Cannon : NetworkBehaviour, IWeapon
     {
         yield return new WaitForSeconds(5f);
         //obj.Despawn();
-        NetworkObjectPool.Singleton.ReturnNetworkObject(obj, projectile);
+        //NetworkObjectPool.Singleton.ReturnNetworkObject(obj, projectile);
         
         
     }
