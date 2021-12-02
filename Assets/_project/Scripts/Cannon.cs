@@ -6,8 +6,7 @@ public class Cannon : NetworkBehaviour, IWeapon
 {
     [SerializeField] private GameObject projectile;
     [SerializeField] private float projectileSpeed = 20;
-    
-    
+
     public void Shoot(Vector3 dir)
     {
         //NetworkObject newProjectile = NetworkObjectPool.Singleton.GetNetworkObject(projectile, transform.position + dir.normalized + transform.forward + Vector3.up, Quaternion.identity);
@@ -24,8 +23,6 @@ public class Cannon : NetworkBehaviour, IWeapon
         yield return new WaitForSeconds(5f);
         //obj.Despawn();
         //NetworkObjectPool.Singleton.ReturnNetworkObject(obj, projectile);
-        
-        
     }
     
     [ServerRpc]
