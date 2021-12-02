@@ -15,7 +15,7 @@ public class LobbyControl : NetworkBehaviour
     public Button ButtonDisconnect;
     //Button, jolla client ilmoittaa olevansa valmis aloittamaan:
     public Button ButtonReady;
-    //Button, jolla valitaan oman tankin väri (sama konsepti toimii mallien, spritejen kanssa):
+   
     public Button ButtonPlayerColor;
     //Infoteksti
     public TMP_Text LobbyText;

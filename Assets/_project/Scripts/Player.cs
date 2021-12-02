@@ -12,6 +12,8 @@ public class Player : NetworkBehaviour
     [SerializeField] private float jumpForce = 10f;
     // TEST
     [SerializeField] private Animator playerAnimator;
+    [SerializeField] private GameObject fpsWeapon;
+    [SerializeField] private GameObject playerBody;
     
     public float inputAcceleration = 1f;
     public float inputDeceleration = 2f;
@@ -43,6 +45,8 @@ public class Player : NetworkBehaviour
         if (IsLocalPlayer)
         {
             playerCamera.enabled = true;
+            fpsWeapon.SetActive(true);
+            playerBody.SetActive(false);
         }
          
         if (IsServer)
