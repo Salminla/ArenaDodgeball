@@ -152,7 +152,7 @@ public class GameController : NetworkBehaviour
         });
 
         string results = "";
-        players.OrderByDescending(pt => pt.Health.Value).ToList().ForEach(pt => results += pt.playerName.Value + " health: " + pt.Health.Value + "\n");
+        players.OrderByDescending(pt => pt.Score.Value).ToList().ForEach(pt => results += pt.playerName.Value + " health: " + pt.Health.Value + " score: " + pt.Score.Value + "\n");
         
 
         if (_endGameImmediately)
