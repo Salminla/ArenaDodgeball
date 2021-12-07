@@ -99,8 +99,10 @@ public class Player : NetworkBehaviour
     }
     void SetInputVector()
     {
-        rawInput.x = InputSmoothing("Horizontal", ref xSmoothed);
-        rawInput.z = InputSmoothing("Vertical", ref ySmoothed);
+        //rawInput.x = InputSmoothing("Horizontal", ref xSmoothed);
+        //rawInput.z = InputSmoothing("Vertical", ref ySmoothed);
+        rawInput.x = Input.GetAxisRaw("Horizontal");
+        rawInput.z = Input.GetAxisRaw("Vertical");
         
         Transform playerTransform = transform;
         //var forward = playerTransform.forward;
@@ -182,11 +184,32 @@ public class Player : NetworkBehaviour
         {
             if (!sprint)
             {
-                rb.velocity = input * ((walkSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, walkSpeed)) * Time.deltaTime) +
-                              rb.velocity.y * Vector3.up;
+                // Max vel is 13
+                if (rb.velocity.magnitude < 13)
+                {
+                    rb.AddForce(input * ((walkSpeed * 8 - Mathf.Clamp(rb.velocity.y * 40, 0, walkSpeed)) * Time.deltaTime));
+                }
+                // moving sideways
+                if (rawInput.x > 0.1f || rawInput.x < -0.1f)
+                {
+                    var locVel = transform.InverseTransformDirection(rb.velocity);
+                    if (locVel.z > 0f || locVel.z < 0f)
+                        rb.AddForce(Vector3.right * locVel.z * -1);
+                    rb.velocity = transform.TransformDirection(locVel);
+                }
+                if (rawInput.z > 0.1f || rawInput.z < -0.1f)
+                {
+                    var locVel = transform.InverseTransformDirection(rb.velocity);
+                    if (locVel.x > 0f || locVel.x < 0f)
+                        rb.AddForce(Vector3.forward * locVel.x * -1);
+                    rb.velocity = transform.TransformDirection(locVel);
+                }
+                //rb.velocity = input * ((walkSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, walkSpeed)) * Time.deltaTime) +
+                //              rb.velocity.y * Vector3.up;
             }
             else
             {
+                
                 rb.velocity =
                     input * ((sprintSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, sprintSpeed)) * Time.deltaTime) +
                     rb.velocity.y * Vector3.up;
