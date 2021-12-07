@@ -19,7 +19,9 @@ public class Player : NetworkBehaviour
     public float inputDeceleration = 2f;
     
     public NetworkVariable<FixedString32Bytes> playerName = new NetworkVariable<FixedString32Bytes>(new FixedString32Bytes(""));
-    public NetworkVariable<int> Health = new NetworkVariable<int>(100);
+    public NetworkVariable<int> Health = new NetworkVariable<int>(20);
+    public NetworkVariable<int> Ammo = new NetworkVariable<int>(2);
+    public NetworkVariable<int> Score = new NetworkVariable<int>(0);
     
     private Vector3 rawInput;
     private Vector3 input;
@@ -52,11 +54,13 @@ public class Player : NetworkBehaviour
         if (IsServer)
         {
             playerName.Value = "Player " + (OwnerClientId + 1);
+            UpdateWeapon();
             //NetworkObjectPool.Singleton.InitializePool();
         }
         else
         {
             SetNameClientRpc("Player " + (OwnerClientId + 1));
+            UpdateWeaponServerRpc();
         }
         
         GameController.GameStarted.OnValueChanged += HandleGameStarted;
@@ -97,6 +101,16 @@ public class Player : NetworkBehaviour
     {
         playerActive = _new;
     }
+
+    private void UpdateWeapon()
+    {
+        if (transform.GetComponentInChildren<IWeapon>() != null)
+        {
+            IWeapon weapon = transform.GetComponentInChildren<IWeapon>();
+            weapon.SetOwner(transform.GetComponent<NetworkObject>());
+            return;
+        }
+    }
     void SetInputVector()
     {
         rawInput.x = InputSmoothing("Horizontal", ref xSmoothed);
@@ -115,7 +129,6 @@ public class Player : NetworkBehaviour
         //playerAnimator.SetFloat("PlayerVel", rb.velocity.magnitude / 10f);
         AnimationFloatServerRpc("PlayerVel", rb.velocity.magnitude / 10f);
         
-        Sprint();
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
             Jump();
     }
@@ -132,10 +145,6 @@ public class Player : NetworkBehaviour
             smoothed = Mathf.Clamp01(Mathf.Abs(smoothed) - inputDeceleration * Time.deltaTime) * Mathf.Sign(smoothed);
         return smoothed;
         
-    }
-    void Sprint()
-    {
-        sprint = Input.GetKey(KeyCode.LeftShift);
     }
     void Jump()
     {
@@ -156,15 +165,17 @@ public class Player : NetworkBehaviour
 
         Debug.Log("No weapon!");
     }
-    public void TakeDamage(Vector3 _hitPoint, int _amount)
+    public void TakeDamage(Vector3 _hitPoint, NetworkObject from ,int _amount)
     {
-        Debug.Log(playerName.Value + " takes " + _amount + " damage.");
+        Debug.Log(playerName.Value + " takes " + _amount + " damage from " + from.GetComponent<Player>().playerName.Value);
         // Instantiate<SelfDestructingNetworkObject>(HitExplosionEffect, _hitPoint, Quaternion.identity).Init(3f);
         
         Health.Value = Health.Value - _amount;
         
         if (Health.Value <= 0)
         {
+            Debug.Log(playerName.Value + " killed " + from.GetComponent<Player>().playerName.Value);
+            from.GetComponent<Player>().Score.Value++;
             Health.Value = 0;
 
             //"Ulkoistettu" CheckPlayerStatusServerRpc käy läpi kaikkien tilan.
@@ -180,18 +191,10 @@ public class Player : NetworkBehaviour
         // Ground movement
         if (isGrounded)
         {
-            if (!sprint)
-            {
-                rb.velocity = input * ((walkSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, walkSpeed)) * Time.deltaTime) +
-                              rb.velocity.y * Vector3.up;
-            }
-            else
-            {
-                rb.velocity =
-                    input * ((sprintSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, sprintSpeed)) * Time.deltaTime) +
-                    rb.velocity.y * Vector3.up;
-            }
-
+            
+            rb.velocity = input * ((walkSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, walkSpeed)) * Time.deltaTime) +
+                          rb.velocity.y * Vector3.up;
+            
             return;
         }
         // Air movement
@@ -214,6 +217,11 @@ public class Player : NetworkBehaviour
     public void ShootServerRpc()
     {
         Shoot();
+    }
+    [ServerRpc]
+    public void UpdateWeaponServerRpc()
+    {
+        UpdateWeapon();
     }
     // Animation triggers done with server RPC
     [ServerRpc]

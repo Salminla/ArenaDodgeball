@@ -34,14 +34,14 @@ public class MouseLook : NetworkBehaviour
     private void HandleGameStarted(bool previousvalue, bool newvalue)
     {
         Cursor.lockState = CursorLockMode.Locked;
-        playerActive = true;
+        playerActive = newvalue;
     }
 
     private void OnApplicationFocus(bool hasFocus)
     {
         if (hasFocus && playerActive)
         {
-            Cursor.lockState = CursorLockMode.Locked;
+            //Cursor.lockState = CursorLockMode.Locked;
         }
     }
 
