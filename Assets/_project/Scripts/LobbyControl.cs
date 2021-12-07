@@ -70,6 +70,7 @@ public class LobbyControl : NetworkBehaviour
 
     private void HandleDisconnectButtonClick()
     {
+        Cursor.lockState = CursorLockMode.None;
         //Host käskyttää clientit kutsumaan Shutdown-metodin disconnectaamiseksi
         //ja vasta sen jälkeen kutsuu itse Shutdownia. 
         if (IsHost)
@@ -78,13 +79,11 @@ public class LobbyControl : NetworkBehaviour
             //Lopetetaan eventtien kuuntelu:
             NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnectedCallback;
             NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnectedCallback;
-            Cursor.lockState = CursorLockMode.None;
         }
         else
         {
             //client sen sijaan voi kutsua suoraan Shutdown-metodia:
             ExecuteShutDown();
-            Cursor.lockState = CursorLockMode.None;
         }
     }
 

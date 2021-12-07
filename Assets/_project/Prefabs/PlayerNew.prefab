@@ -331,6 +331,8 @@ MonoBehaviour:
         byte0029: 0
   Health:
     m_InternalValue: 100
+  Ammo:
+    m_InternalValue: 2
 --- !u!95 &404429790163029136
 Animator:
   serializedVersion: 3
@@ -363,7 +365,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Animator: {fileID: 8801443819377804980}
-  m_ParameterSendBits: 0
+  m_ParameterSendBits: 63
   m_SendRate: 0.1
 --- !u!1001 &861808290818264488
 PrefabInstance:
