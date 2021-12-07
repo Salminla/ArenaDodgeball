@@ -20,6 +20,8 @@ public class LobbyControl : NetworkBehaviour
     //Infoteksti
     public TMP_Text LobbyText;
 
+    public TMP_InputField LobbyInfoText;
+
     //Minimipelaajamäärä pelin aloittamiseksi
     [SerializeField]
     private int MinimumPlayerCount = 2;
@@ -33,6 +35,10 @@ public class LobbyControl : NetworkBehaviour
     private void Start()
     {
         ButtonDisconnect.gameObject.SetActive(false);
+        
+        ButtonReady.onClick.AddListener(() => HandlePlayerIsReadyButtonClick());
+        ButtonPlayerColor.onClick.AddListener(() => HandleTankColorButtonClick());
+        ButtonDisconnect.onClick.AddListener(() => HandleDisconnectButtonClick());
     }
 
     public void Init()
@@ -62,10 +68,6 @@ public class LobbyControl : NetworkBehaviour
             //Lobbyssa olevien pelaajien tilanne päivitetään UI:n Text-objektiin:
             UpdateLobbyText();
         }
-
-        ButtonReady.onClick.AddListener(() => HandlePlayerIsReadyButtonClick());
-        ButtonPlayerColor.onClick.AddListener(() => HandleTankColorButtonClick());
-        ButtonDisconnect.onClick.AddListener(() => HandleDisconnectButtonClick());
     }
 
     private void HandleDisconnectButtonClick()
@@ -176,6 +178,10 @@ public class LobbyControl : NetworkBehaviour
 
         if (IsServer)
         {
+            UnityTransport transport = NetworkManager.Singleton.NetworkConfig.NetworkTransport as UnityTransport;
+            ulong roundTripTime = transport.GetCurrentRtt(clientId);
+            Debug.Log("Round trip time to client " + clientId + " is: " + System.Convert.ToInt32(roundTripTime));
+            
             if (!ClientsInLobby.ContainsKey(clientId)) ClientsInLobby.Add(clientId, false);
             UpdateLobbyText();
             UpdateAndCheckPlayersInLobby();
@@ -297,5 +303,10 @@ public class LobbyControl : NetworkBehaviour
             UpdateAndCheckPlayersInLobby();
             UpdateLobbyText();
         }
+    }
+
+    public void SetJoinCodeInfoText(string joinCode)
+    {
+        LobbyInfoText.text = "Client join code: " + joinCode;
     }
 }
