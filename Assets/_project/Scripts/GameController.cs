@@ -18,7 +18,7 @@ public class GameController : NetworkBehaviour
     public Button buttonClient;
 
     public TMP_Dropdown DropDownRegions;
-    public TMP_Text InputFieldJoinCode;
+    public TMP_InputField InputFieldJoinCode;
     
     public LobbyControl LobbyControlRef;
 

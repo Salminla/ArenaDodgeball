@@ -37,7 +37,7 @@ public class Player : NetworkBehaviour
     
     void Start()
     {
-        Application.targetFrameRate = 144;
+        // Application.targetFrameRate = 144;
         
         rb = GetComponent<Rigidbody>();
     }
