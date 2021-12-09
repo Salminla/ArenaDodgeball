@@ -5773,6 +5773,10 @@ PrefabInstance:
       propertyPath: GlobalObjectIdHash
       value: 1598972895
       objectReference: {fileID: 0}
+    - target: {fileID: 3959190196913099312, guid: 1e796bd1bf4907b47855a903c883aa34, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: c478ddfe60902704f8895f2694097d0d, type: 2}
     - target: {fileID: 4134049449394176454, guid: 1e796bd1bf4907b47855a903c883aa34, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 736860392
@@ -5837,5 +5841,9 @@ PrefabInstance:
       propertyPath: GlobalObjectIdHash
       value: 1618959268
       objectReference: {fileID: 0}
+    - target: {fileID: 8094787579394139054, guid: 1e796bd1bf4907b47855a903c883aa34, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: c478ddfe60902704f8895f2694097d0d, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1e796bd1bf4907b47855a903c883aa34, type: 3}

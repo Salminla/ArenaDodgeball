@@ -169,7 +169,8 @@ public class Player : NetworkBehaviour
             if (transform.GetComponentInChildren<IWeapon>() != null)
             {
                 IWeapon weapon = transform.GetComponentInChildren<IWeapon>();
-                weapon.Shoot(playerCamera.transform.forward);
+                weapon.Shoot(playerCamera.transform.forward, OwnerClientId);
+                
                 //playerAnimator.SetTrigger("Shoot");
                 AnimationTriggerServerRpc("Shoot");
                 return;
@@ -178,17 +179,22 @@ public class Player : NetworkBehaviour
             Debug.Log("No weapon!");
         }
     }
-    public void TakeDamage(Vector3 _hitPoint, NetworkObject from ,int _amount)
+    public void TakeDamage(Vector3 _hitPoint, ulong from ,int _amount)
     {
-        Debug.Log(playerName.Value + " takes " + _amount + " damage from " + from.GetComponent<Player>().playerName.Value);
+        //Debug.Log(playerName.Value + " takes " + _amount + " damage from " + from.GetComponent<Player>().playerName.Value);
         // Instantiate<SelfDestructingNetworkObject>(HitExplosionEffect, _hitPoint, Quaternion.identity).Init(3f);
-        
-        Health.Value = Health.Value - _amount;
+        if (OwnerClientId != from)
+        {
+            Health.Value = Health.Value - _amount;
+        }
         
         if (Health.Value <= 0)
         {
-            Debug.Log(playerName.Value + " killed " + from.GetComponent<Player>().playerName.Value);
-            from.GetComponent<Player>().Score.Value++;
+            //Debug.Log(playerName.Value + " killed " + from.GetComponent<Player>().playerName.Value);
+            //from.GetComponent<Player>().Score.Value++;
+            var client = NetworkManager.Singleton.ConnectedClients[from];
+            client.PlayerObject.GetComponent<Player>().Score.Value++;
+            
             Health.Value = 0;
 
             //"Ulkoistettu" CheckPlayerStatusServerRpc käy läpi kaikkien tilan.

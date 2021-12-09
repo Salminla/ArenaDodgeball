@@ -15,19 +15,19 @@ public class Cannon : NetworkBehaviour, IWeapon
         this.owner = owner;
     }
 
-    public void Shoot(Vector3 dir)
+    public void Shoot(Vector3 dir, ulong ownerId)
     {
         //NetworkObject newProjectile = NetworkObjectPool.Singleton.GetNetworkObject(projectile, transform.position + dir.normalized + transform.forward + Vector3.up, Quaternion.identity);
         NetworkObject newProjectile = Instantiate(projectile,
             transform.position + dir.normalized + transform.forward + Vector3.up, Quaternion.identity).GetComponent<NetworkObject>();
-        newProjectile.GetComponent<Projectile>().owner = owner;
+        newProjectile.GetComponent<Projectile>().ownerId = ownerId;
         newProjectile.GetComponent<SelfDestructingNetworkObject>().Init(5f, this);
         newProjectile.GetComponent<Rigidbody>().AddForce(dir * projectileSpeed, ForceMode.Impulse);
     }
 
     [ServerRpc]
-    public void ShootServerRpc(Vector3 dir)
+    public void ShootServerRpc(Vector3 dir, ulong ownerId)
     {
-        Shoot(dir);
+        Shoot(dir, ownerId);
     }
 }

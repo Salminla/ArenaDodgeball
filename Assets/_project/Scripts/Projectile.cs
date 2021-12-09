@@ -7,7 +7,7 @@ namespace _project.Scripts
     {
         public int damageAmount = 10;
         
-        public NetworkObject owner;
+        public ulong ownerId;
 
         void OnCollisionEnter(Collision collision)
         {
@@ -18,7 +18,7 @@ namespace _project.Scripts
             
             if (player != null)
             {
-                player.TakeDamage(collision.GetContact(0).point, owner, damageAmount);
+                player.TakeDamage(collision.GetContact(0).point, ownerId, damageAmount);
             }
         }
     }
