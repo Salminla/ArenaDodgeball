@@ -31,6 +31,11 @@ public class MouseLook : NetworkBehaviour
         GameController.GameStarted.OnValueChanged += HandleGameStarted;
     }
 
+    public override void OnNetworkDespawn()
+    {
+        Cursor.lockState = CursorLockMode.None;
+    }
+
     private void HandleGameStarted(bool previousvalue, bool newvalue)
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -41,7 +46,7 @@ public class MouseLook : NetworkBehaviour
     {
         if (hasFocus && playerActive)
         {
-            //Cursor.lockState = CursorLockMode.Locked;
+            Cursor.lockState = CursorLockMode.Locked;
         }
     }
 
