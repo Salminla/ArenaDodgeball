@@ -5620,7 +5620,7 @@ MonoBehaviour:
       SourcePrefabToOverride: {fileID: 0}
       SourceHashToOverride: 0
       OverridingTargetPrefab: {fileID: 0}
-    TickRate: 50
+    TickRate: 40
     ClientConnectionBufferTimeout: 10
     ConnectionApproval: 1
     ConnectionData: 
@@ -5757,6 +5757,26 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1909471567}
     m_Modifications:
+    - target: {fileID: 53971021, guid: 1e796bd1bf4907b47855a903c883aa34, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 3646660833
+      objectReference: {fileID: 0}
+    - target: {fileID: 93455919, guid: 1e796bd1bf4907b47855a903c883aa34, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 3304919183
+      objectReference: {fileID: 0}
+    - target: {fileID: 618194532, guid: 1e796bd1bf4907b47855a903c883aa34, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 1346868099
+      objectReference: {fileID: 0}
+    - target: {fileID: 2138527699, guid: 1e796bd1bf4907b47855a903c883aa34, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 1598972895
+      objectReference: {fileID: 0}
+    - target: {fileID: 4134049449394176454, guid: 1e796bd1bf4907b47855a903c883aa34, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 736860392
+      objectReference: {fileID: 0}
     - target: {fileID: 7197974061631540868, guid: 1e796bd1bf4907b47855a903c883aa34, type: 3}
       propertyPath: m_Name
       value: arenaUusiTesti
@@ -5804,6 +5824,18 @@ PrefabInstance:
     - target: {fileID: 7543397337221452862, guid: 1e796bd1bf4907b47855a903c883aa34, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8008876319295734708, guid: 1e796bd1bf4907b47855a903c883aa34, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 1406800387
+      objectReference: {fileID: 0}
+    - target: {fileID: 8008876319295734712, guid: 1e796bd1bf4907b47855a903c883aa34, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 2782942423
+      objectReference: {fileID: 0}
+    - target: {fileID: 8008876319295734714, guid: 1e796bd1bf4907b47855a903c883aa34, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 1618959268
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1e796bd1bf4907b47855a903c883aa34, type: 3}

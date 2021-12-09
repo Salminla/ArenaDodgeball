@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
@@ -10,6 +12,9 @@ public class Player : NetworkBehaviour
     [SerializeField] private float walkSpeed = 500f;
     [SerializeField] private float sprintSpeed = 800f;
     [SerializeField] private float jumpForce = 10f;
+    [SerializeField] private float shootDelay = 1f;
+
+    
     // TEST
     [SerializeField] private Animator playerAnimator;
     [SerializeField] private GameObject fpsWeapon;
@@ -19,7 +24,7 @@ public class Player : NetworkBehaviour
     public float inputDeceleration = 2f;
     
     public NetworkVariable<FixedString32Bytes> playerName = new NetworkVariable<FixedString32Bytes>(new FixedString32Bytes(""));
-    public NetworkVariable<int> Health = new NetworkVariable<int>(20);
+    public NetworkVariable<int> Health = new NetworkVariable<int>(30);
     public NetworkVariable<int> Ammo = new NetworkVariable<int>(2);
     public NetworkVariable<int> Score = new NetworkVariable<int>(0);
     
@@ -32,6 +37,7 @@ public class Player : NetworkBehaviour
     private bool isGrounded;
     private bool sprint;
     private bool hasInput;
+    private bool allowShooting = true;
 
     private bool playerActive;
     
@@ -156,16 +162,21 @@ public class Player : NetworkBehaviour
     }
     void Shoot()
     {
-        if (transform.GetComponentInChildren<IWeapon>() != null)
+        if (allowShooting)
         {
-            IWeapon weapon = transform.GetComponentInChildren<IWeapon>();
-            weapon.Shoot(playerCamera.transform.forward);
-            //playerAnimator.SetTrigger("Shoot");
-            AnimationTriggerServerRpc("Shoot");
-            return;
-        }
+            allowShooting = false;
+            StartCoroutine(ShootDelay());
+            if (transform.GetComponentInChildren<IWeapon>() != null)
+            {
+                IWeapon weapon = transform.GetComponentInChildren<IWeapon>();
+                weapon.Shoot(playerCamera.transform.forward);
+                //playerAnimator.SetTrigger("Shoot");
+                AnimationTriggerServerRpc("Shoot");
+                return;
+            }
 
-        Debug.Log("No weapon!");
+            Debug.Log("No weapon!");
+        }
     }
     public void TakeDamage(Vector3 _hitPoint, NetworkObject from ,int _amount)
     {
@@ -233,6 +244,13 @@ public class Player : NetworkBehaviour
             0.40f, 
             LayerMask.GetMask("Default"));
     }
+
+    IEnumerator ShootDelay()
+    {
+        yield return new WaitForSeconds(shootDelay);
+        allowShooting = true;
+    }
+
     [ServerRpc]
     public void InputValueServerRpc(Vector3 move)
     {
