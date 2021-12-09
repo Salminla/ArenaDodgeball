@@ -16,6 +16,6 @@ public class RotatingObject : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.Rotate(Vector3.forward * rotateSpeed * Time.deltaTime);
+        transform.Rotate(Vector3.up * rotateSpeed * Time.deltaTime);
     }
 }
