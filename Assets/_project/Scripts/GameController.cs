@@ -85,6 +85,13 @@ public class GameController : NetworkBehaviour
         
         GetRelayRegions();
     }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+            Cursor.lockState = CursorLockMode.None;
+    }
+
     async private void GetRelayRegions()
     {
         Task<List<Region>> regionsTask = RelaySetup.GetRegions();
