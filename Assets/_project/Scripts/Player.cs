@@ -8,13 +8,13 @@ using UnityEngine;
 public class Player : NetworkBehaviour
 {
     [SerializeField] private Camera playerCamera;
+
     //[SerializeField] private MouseLook mouseLook;
     [SerializeField] private float walkSpeed = 500f;
     [SerializeField] private float sprintSpeed = 800f;
     [SerializeField] private float jumpForce = 10f;
     [SerializeField] private float shootDelay = 1f;
 
-    
     // TEST
     [SerializeField] private Animator playerAnimator;
     [SerializeField] private GameObject fpsWeapon;
@@ -24,7 +24,7 @@ public class Player : NetworkBehaviour
     public float inputDeceleration = 2f;
     
     public NetworkVariable<FixedString32Bytes> playerName = new NetworkVariable<FixedString32Bytes>(new FixedString32Bytes(""));
-    public NetworkVariable<int> Health = new NetworkVariable<int>(30);
+    public NetworkVariable<int> Health = new NetworkVariable<int>(20);
     public NetworkVariable<int> Ammo = new NetworkVariable<int>(2);
     public NetworkVariable<int> Score = new NetworkVariable<int>(0);
     
@@ -119,10 +119,10 @@ public class Player : NetworkBehaviour
     }
     void SetInputVector()
     {
-        rawInput.x = InputSmoothing("Horizontal", ref xSmoothed);
-        rawInput.z = InputSmoothing("Vertical", ref ySmoothed);
-        //rawInput.x = Input.GetAxisRaw("Horizontal");
-        //rawInput.z = Input.GetAxisRaw("Vertical");
+        //rawInput.x = InputSmoothing("Horizontal", ref xSmoothed);
+        //rawInput.z = InputSmoothing("Vertical", ref ySmoothed);
+        rawInput.x = Input.GetAxisRaw("Horizontal");
+        rawInput.z = Input.GetAxisRaw("Vertical");
         
         Transform playerTransform = transform;
         //var forward = playerTransform.forward;
@@ -216,8 +216,17 @@ public class Player : NetworkBehaviour
             {
                 //rb.AddForce(input * ((walkSpeed * 15 - Mathf.Clamp(rb.velocity.y * 40, 0, walkSpeed)) * Time.deltaTime));
             }
-            rb.velocity = input * ((walkSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, walkSpeed)) * Time.deltaTime) +
-                          rb.velocity.y * Vector3.up;
+            //rb.velocity = input * ((walkSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, walkSpeed)) * Time.deltaTime) +
+            //              rb.velocity.y * Vector3.up;
+            Vector3 direction = input;
+            direction.Normalize();
+ 
+            rb.AddForce(direction * walkSpeed * 20 * Time.deltaTime, ForceMode.Acceleration);
+ 
+            if (rb.velocity.magnitude > 8) 
+            {
+                rb.velocity = rb.velocity.normalized * 8;
+            }
             /*
             // moving sideways
             if (rawInput.x > 0.1f || rawInput.x < -0.1f)

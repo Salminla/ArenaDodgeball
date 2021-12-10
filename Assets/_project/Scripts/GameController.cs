@@ -13,6 +13,8 @@ using Random = UnityEngine.Random;
 public class GameController : NetworkBehaviour
 {
     public static GameController Instance { private set; get; }
+
+    public Camera lobbyCamera;
     
     public Button buttonHost;
     public Button buttonClient;
@@ -57,8 +59,6 @@ public class GameController : NetworkBehaviour
         //että kutsuu sitä vasta Startissa!
         NetworkManager.Singleton.ConnectionApprovalCallback += ConnectionApproval;
 
-        
-        
         transport = NetworkManager.Singleton.NetworkConfig.NetworkTransport as UnityTransport;
         
         RoundOverContainer.gameObject.SetActive(false);
@@ -206,6 +206,7 @@ public class GameController : NetworkBehaviour
     
     public void ShowStartContainer(bool _show)
     {
+        lobbyCamera.enabled = true;
         StartContainer.gameObject.SetActive(_show);
         LobbyContainer.gameObject.SetActive(!_show);        
        // textInfo.text = GetInfoText(_show);
@@ -238,6 +239,7 @@ public class GameController : NetworkBehaviour
     */
     Transform GetSpawnPoint()
     {
+        if (spawnIndex >= spawnPoints.Count-1) spawnIndex = 0;
         Transform newSpawn = spawnPoints[0];
         newSpawn = spawnIndex > 0 ? spawnPoints[spawnIndex] : spawnPoints[0];
         spawnIndex++;
@@ -253,12 +255,16 @@ public class GameController : NetworkBehaviour
     public void StartOrEndGameClientRpc(bool _start, string _results)
     {
         if (_start)
+        {
             LobbyContainer.gameObject.SetActive(false);
+            lobbyCamera.enabled = false;
+        }
         else
         {
             RoundOverContainer.gameObject.SetActive(true);
             Cursor.lockState = CursorLockMode.None;
             TextResults.text = _results;
+            lobbyCamera.enabled = true;
         }
         
         GameStarted.Value = _start;
