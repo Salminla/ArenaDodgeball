@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
@@ -13,7 +14,10 @@ public class Player : NetworkBehaviour
     [SerializeField] private float walkSpeed = 500f;
     [SerializeField] private float sprintSpeed = 800f;
     [SerializeField] private float jumpForce = 10f;
-    [SerializeField] private float shootDelay = 1f;
+
+    [SerializeField] private GameObject playerUI;
+    [SerializeField] private TMP_Text healthText;
+    public GameObject hitMarker;
 
     // TEST
     [SerializeField] private Animator playerAnimator;
@@ -24,7 +28,7 @@ public class Player : NetworkBehaviour
     public float inputDeceleration = 2f;
     
     public NetworkVariable<FixedString32Bytes> playerName = new NetworkVariable<FixedString32Bytes>(new FixedString32Bytes(""));
-    public NetworkVariable<int> Health = new NetworkVariable<int>(20);
+    public NetworkVariable<int> Health = new NetworkVariable<int>(30);
     public NetworkVariable<int> Ammo = new NetworkVariable<int>(2);
     public NetworkVariable<int> Score = new NetworkVariable<int>(0);
     
@@ -55,6 +59,9 @@ public class Player : NetworkBehaviour
             playerCamera.enabled = true;
             fpsWeapon.SetActive(true);
             playerBody.SetActive(false);
+            playerUI.transform.SetParent(null);
+            if (healthText != null)
+                healthText.text = "Health " + Health.Value;
         }
          
         if (IsServer)
@@ -98,7 +105,9 @@ public class Player : NetworkBehaviour
         SetInputVector();
 
         InputValueServerRpc(input);
-
+        
+        healthText.text = "Health " + Health.Value;
+        
         if (Input.GetKeyDown(KeyCode.Mouse0))
             ShootServerRpc();
     }
@@ -162,30 +171,27 @@ public class Player : NetworkBehaviour
     }
     void Shoot()
     {
-        if (allowShooting)
+        if (transform.GetComponentInChildren<IWeapon>() != null)
         {
-            allowShooting = false;
-            StartCoroutine(ShootDelay());
-            if (transform.GetComponentInChildren<IWeapon>() != null)
-            {
-                IWeapon weapon = transform.GetComponentInChildren<IWeapon>();
-                weapon.Shoot(playerCamera.transform.forward, OwnerClientId);
-                
-                //playerAnimator.SetTrigger("Shoot");
-                AnimationTriggerServerRpc("Shoot");
-                return;
-            }
-
-            Debug.Log("No weapon!");
+            IWeapon weapon = transform.GetComponentInChildren<IWeapon>();
+            weapon.Shoot(playerCamera.transform.forward, OwnerClientId);
+            
+            //playerAnimator.SetTrigger("Shoot");
+            AnimationTriggerServerRpc("Shoot");
+            return;
         }
+
+        Debug.Log("No weapon!");
     }
     public void TakeDamage(Vector3 _hitPoint, ulong from ,int _amount)
     {
-        //Debug.Log(playerName.Value + " takes " + _amount + " damage from " + from.GetComponent<Player>().playerName.Value);
         // Instantiate<SelfDestructingNetworkObject>(HitExplosionEffect, _hitPoint, Quaternion.identity).Init(3f);
         if (OwnerClientId != from)
         {
             Health.Value = Health.Value - _amount;
+            
+            var client = NetworkManager.Singleton.ConnectedClients[from];
+            StartCoroutine(ShowHitMarker(client.PlayerObject.GetComponent<Player>(), 0.1f));
         }
         
         if (Health.Value <= 0)
@@ -211,40 +217,15 @@ public class Player : NetworkBehaviour
         if (isGrounded)
         {
 
-            // Max vel is 13
-            if (rb.velocity.magnitude < 13)
-            {
-                //rb.AddForce(input * ((walkSpeed * 15 - Mathf.Clamp(rb.velocity.y * 40, 0, walkSpeed)) * Time.deltaTime));
-            }
-            //rb.velocity = input * ((walkSpeed - Mathf.Clamp(rb.velocity.y * 40, 0, walkSpeed)) * Time.deltaTime) +
-            //              rb.velocity.y * Vector3.up;
             Vector3 direction = input;
             direction.Normalize();
  
-            rb.AddForce(direction * walkSpeed * 20 * Time.deltaTime, ForceMode.Acceleration);
+            rb.AddForce(direction * walkSpeed * 10 * Time.deltaTime, ForceMode.Acceleration);
  
             if (rb.velocity.magnitude > 8) 
             {
                 rb.velocity = rb.velocity.normalized * 8;
             }
-            /*
-            // moving sideways
-            if (rawInput.x > 0.1f || rawInput.x < -0.1f)
-            {
-                var locVel = transform.InverseTransformDirection(rb.velocity);
-                if (locVel.z > 0f || locVel.z < 0f)
-                    rb.AddForce(Vector3.right * locVel.z * -1);
-                rb.velocity = transform.TransformDirection(locVel);
-            }
-            if (rawInput.z > 0.1f || rawInput.z < -0.1f)
-            {
-                var locVel = transform.InverseTransformDirection(rb.velocity);
-                if (locVel.x > 0f || locVel.x < 0f)
-                    rb.AddForce(Vector3.forward * locVel.x * -1);
-                rb.velocity = transform.TransformDirection(locVel);
-            }
-            
-            */
 
             return;
         }
@@ -260,12 +241,13 @@ public class Player : NetworkBehaviour
             LayerMask.GetMask("Default"));
     }
 
-    IEnumerator ShootDelay()
+    IEnumerator ShowHitMarker(Player player, float time)
     {
-        yield return new WaitForSeconds(shootDelay);
-        allowShooting = true;
+        player.hitMarker.SetActive(true);
+        yield return new WaitForSeconds(time);
+        player.hitMarker.SetActive(false);
     }
-
+    
     [ServerRpc]
     public void InputValueServerRpc(Vector3 move)
     {

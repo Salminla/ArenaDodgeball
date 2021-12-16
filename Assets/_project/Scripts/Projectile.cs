@@ -1,4 +1,5 @@
-﻿using Unity.Netcode;
+﻿using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace _project.Scripts
@@ -8,6 +9,10 @@ namespace _project.Scripts
         public int damageAmount = 10;
         
         public ulong ownerId;
+        public override void OnNetworkSpawn()
+        {
+            StartCoroutine(SetCollision());
+        }
 
         void OnCollisionEnter(Collision collision)
         {
@@ -20,6 +25,13 @@ namespace _project.Scripts
             {
                 player.TakeDamage(collision.GetContact(0).point, ownerId, damageAmount);
             }
+        }
+
+        IEnumerator SetCollision()
+        {
+            gameObject.GetComponent<SphereCollider>().enabled = false;
+            yield return new WaitForSeconds(0.05f);
+            gameObject.GetComponent<SphereCollider>().enabled = true;
         }
     }
 }

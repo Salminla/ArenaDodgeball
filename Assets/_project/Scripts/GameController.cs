@@ -18,7 +18,7 @@ public class GameController : NetworkBehaviour
     
     public Button buttonHost;
     public Button buttonClient;
-
+    
     public TMP_Dropdown DropDownRegions;
     public TMP_InputField InputFieldJoinCode;
     
@@ -240,13 +240,13 @@ public class GameController : NetworkBehaviour
     Transform GetSpawnPoint()
     {
         if (spawnIndex >= spawnPoints.Count-1) spawnIndex = 0;
-        Transform newSpawn = spawnPoints[0];
-        newSpawn = spawnIndex > 0 ? spawnPoints[spawnIndex] : spawnPoints[0];
+        Transform newSpawn = spawnPoints[spawnIndex];
         spawnIndex++;
         return newSpawn;
     }
     void ConnectionApproval(byte[] payload, ulong clientId, NetworkManager.ConnectionApprovedDelegate callback)
     {
+        Debug.Log("Approving connection");
         //ConnectionApprovedDelegate, jossa instantioidaan pelaaja spawn pointiin:
         Transform newSpawn = GetSpawnPoint();
         callback(true, null, true, newSpawn.position, newSpawn.rotation);
