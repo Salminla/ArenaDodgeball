@@ -9,6 +9,7 @@ using UnityEngine;
 public class Player : NetworkBehaviour
 {
     [SerializeField] private Camera playerCamera;
+    [SerializeField] private Camera uiCamera;
 
     //[SerializeField] private MouseLook mouseLook;
     [SerializeField] private float walkSpeed = 500f;
@@ -57,6 +58,7 @@ public class Player : NetworkBehaviour
         if (IsLocalPlayer)
         {
             playerCamera.enabled = true;
+            uiCamera.enabled = true;
             fpsWeapon.SetActive(true);
             playerBody.SetActive(false);
             playerUI.transform.SetParent(null);
@@ -185,7 +187,7 @@ public class Player : NetworkBehaviour
     }
     public void TakeDamage(Vector3 _hitPoint, ulong from ,int _amount)
     {
-        // Instantiate<SelfDestructingNetworkObject>(HitExplosionEffect, _hitPoint, Quaternion.identity).Init(3f);
+        
         if (OwnerClientId != from)
         {
             Health.Value = Health.Value - _amount;
@@ -197,7 +199,6 @@ public class Player : NetworkBehaviour
         if (Health.Value <= 0)
         {
             //Debug.Log(playerName.Value + " killed " + from.GetComponent<Player>().playerName.Value);
-            //from.GetComponent<Player>().Score.Value++;
             var client = NetworkManager.Singleton.ConnectedClients[from];
             client.PlayerObject.GetComponent<Player>().Score.Value++;
             
@@ -210,6 +211,7 @@ public class Player : NetworkBehaviour
             //pelaajien osalta, johon voi käyttää tämän tyylistä ideaa.
             GameController.Instance.CheckPlayerStatusServerRpc(false);
         }
+        // Instantiate<SelfDestructingNetworkObject>(HitExplosionEffect, _hitPoint, Quaternion.identity).Init(3f);
     }
     void MovePlayer()
     {
